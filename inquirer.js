@@ -1,32 +1,36 @@
 const inquirer = require("inquirer");
 
-inquirer
-  .prompt([
-    {
-      type: "list",
-      name: "startQ",
-      message: "What would you like to do?",
-      choices: ["View Employees", "Add Employee", "Delete Employee"],
-      validate: (value) => {
-        if (value) {
-          return true;
-        } else {
-          return "I need a value to continue";
-        }
+
+
+const startProg = [
+      {
+        type: "list",
+        name: "startQ",
+        message: "What would you like to do?",
+        choices: ["View Employees", "Add Employee", "Delete Employee", "Exit"],
+        validate: (value) => {
+          if (value) {
+            return true;
+          } else {
+            return "I need a value to continue";
+          }
+        },
       },
-    },
-  ])
-  .then(function (response) {
-    if (response.startQ === "Add Employee") {
-      addEmp();
-    } else if (response.startQ === "Delete Employee") {
-        delEmp()
-    }
-  });
+    ]
+    .then(function (response) {
+      if (response.startQ === "Add Employee") {
+        newEmp();
+      } else if (response.startQ === "Delete Employee") {
+          delEmp()
+      } else {
+        viewEmp();
+      }
+    });
+
+
 
   //questions to add employee to table
-const addEmp = () => {
-  inquirer.prompt([
+const newEmp = [
     {
       type: "input",
       name: "first_name",
@@ -108,12 +112,26 @@ const addEmp = () => {
         }
       },
     },
-  ]);
-};
+  ];
+
 
 
 //questions to delete employee
 
-const delEmp = () => {
+const delEmp = [
+  {
+    type: 'list',
+    name: 'emp-list',
+    message: 'Who would you like to delete?',
+    choices: []
+  }
+];
 
-},
+// view employees
+// const viewEmp = [
+//   {
+
+// }]
+
+
+module.exports = {viewEmp, newEmp, delEmp}
