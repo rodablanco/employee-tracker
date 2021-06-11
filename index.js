@@ -2,6 +2,8 @@ const mysql = require("mysql");
 const inquirer = require("inquirer");
 const util = require("util");
 const { exit } = require("process");
+const { stringify } = require("querystring");
+const { REPL_MODE_STRICT } = require("repl");
 // const { start } = require("repl");
 // const { newEmp, delEmp, viewEmp } = require("./inquirer");
 
@@ -76,8 +78,8 @@ const start = () => {
         case "Update Employee roles":
           const roles2 = await view("role")
           updateEmp();
-          console.table(roles2);
-          //setTimeout(start, 2000);
+          //console.table(roles2);
+         ;
           break;
         default:
           close();
@@ -156,25 +158,59 @@ const newEmp = async () => {
       setTimeout(start, 2000);
     });
 };
+// function delEmp() {
+//   let empList = [];
+//   connection.query("SELECT employee.first_name, employee.last_name FROM employee", (err, res) => {
+//     for (let i = 0; i < res.length; i++){
+//       empList.push(res[i].first_name + " " + res[i].last_name);
 
+//     }
+//     inquirer
+//       .prompt([
+//         {
+//           type: "list",
+//           name: "employee",
+//           message: "Which employee would you like to delete?",
+//           choices: empList
+//       },
+//       ])
+//       .then(function (res) {
+//         const query = connection.query(`DELETE FROM employee WHERE concat(first_name, ' ', last_name) = '${res.employee}' `,
+//           function (err, res) {
+//             if (err) throw err;
+//             console.log('Employee deleted!/n');
+//             start();
+//           });
+//     })
+//   })
+// }
 const delEmp = async () => {
-    const emps = await view("employee");
-  inquirer.prompt([
-    {
-      type: "list",
-      name: "employee",
-      message: "Who would you like to delete?",
-          choices: emps.map((a) => ({
-              name: a.first_name + " " + a.last_name,
-              value: a.id,
-      })),
-    },
-  ])
-      .then(async (res) => {
-          await connection.query("DELETE FROM employee WHERE employee.id = ?", res)
+  const emps = await view("employee");
+  
+  
+  inquirer
+    .prompt([
+      {
+        type: "list",
+        name: "employee",
+        message: "Who would you like to delete?",
+        choices: emps.map((a) => ({
+          name: a.first_name + " " + a.last_name,
+          value: a.id,
+        })),
+      },
+    ])
+    .then(function (res) {
+      connection.query(
+        `DELETE FROM employee WHERE id = ${res.employee}`,
+        function (err, res) {
+          if (err) throw err;
           console.log("employee deleted");
           setTimeout(start, 2000);
-      });
+        }
+      );
+     
+    });
 };
 
 const viewEmpAll = () => {
@@ -191,55 +227,39 @@ const viewEmpAll = () => {
 };
 
 
-const updateEmp = async () => {
+const updateEmp = async() => {
+
   const roles = await view("role");
   const emps = await view("employee");
   inquirer
     .prompt([
       {
         type: "list",
-        name: "role",
+        name: "empName",
         message: "Which employee's role would you like to change?",
-        choices: emps.map(
-          (a) => (
-            {
-              name: a.first_name + " " + a.last_name,
-              value: a.id,
-            }
-          
-          )
-        ),
+        choices: emps.map((a) => ({
+          name: a.first_name + " " + a.last_name,
+          value: a.id,
+        })),
+      },
+      {
+        type: "list",
+        name: "role",
+        message: `What would you like his/her new role to be?`,
+        choices: roles.map((role) => ({ name: role.title, value: role.id })),
       },
     ])
-    .then(async (res) => {
-      inquirer
-        .prompt([
-          {
-            type: "list",
-            name: "role_id",
-            message: `What would you like his/her new position to be?`,
-            choices: roles.map((role) => ({name: role.title, value: role.id})),
+    .then(function (res) {
+      connection.query(`UPDATE employee SET role_id = ${res.role} WHERE id = ${res.empName}`,
+        function (err, res) {
+          console.log('Employee role updated!');
+          console.log(err)
         }
-      ])
+      );
+       setTimeout(start, 2000);
     })
-    //left of here!!
-     .then(async (res) => {
-       await connection.query("UPDATE employee SET role_id = ? WHERE ", res);
-       console.log("employee role updates")
-      
-     });
+    //
 }
-
-
-
-
-
-
-
-
-
-
-
 
 
 
